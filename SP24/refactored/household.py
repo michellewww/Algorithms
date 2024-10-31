@@ -297,7 +297,7 @@ if __name__=="__main__":
         if child_bool:
             num_child = random.choices(pop_data['children_groups'], pop_data['children_percent'])[0]
             for i in range(num_child):
-                household.add_member(Person(pop_data['count'], random.choices([0, 1], [pop_data['male_percent'], pop_data['female_percent']])[0], random.choice(range(1, 19)), cbg, household, count))
+                household.add_member(Person(pop_data['count'], random.choices([0, 1], [pop_data['male_percent'], pop_data['female_percent']])[0], random.choice(range(1, 18)), cbg, household, count))
                 pop_data['count'] += 1
         
         return household
@@ -315,11 +315,21 @@ if __name__=="__main__":
         husband_age = random.choice(range(age_group, age_group+10))
         wife_age = random.choice(range(age_group, age_group+10))
 
+        # gender == 0 means male, gender == 1 means female
         gender = random.choices([0, 1], [pop_data['male_percent'], pop_data['female_percent']])[0]
         household.add_member(Person(pop_data['count'], gender, husband_age, cbg, household, count))
         pop_data['count'] += 1
         household.add_member(Person(pop_data['count'], gender, wife_age, cbg, household, count))
         pop_data['count'] += 1
+
+        # assign children based on sex
+        children_percent = pop_data['same_sex_child_percent'][gender]
+        child_bool = random.choices([True, False], [children_percent, 100 - children_percent])[0]
+        if child_bool:
+            household.add_member(Person(pop_data['count'],
+                                        random.choices([0, 1], [pop_data['male_percent'], pop_data['female_percent']])[
+                                            0], random.choice(range(1, 18)), cbg, household, count))
+            pop_data['count'] += 1
 
         return household
 
@@ -338,6 +348,15 @@ if __name__=="__main__":
         household.add_member(Person(pop_data['count'], random.choices([0, 1], [pop_data['male_percent'], pop_data['female_percent']])[0], wife_age, cbg, household, count))
         pop_data['count'] += 1
 
+        # assign children
+        children_percent = pop_data['opp_sex_child_percent']
+        child_bool = random.choices([True, False], [children_percent, 100 - children_percent])[0]
+        if child_bool:
+            household.add_member(Person(pop_data['count'],
+                                        random.choices([0, 1], [pop_data['male_percent'], pop_data['female_percent']])[
+                                            0], random.choice(range(1, 18)), cbg, household, count))
+            pop_data['count'] += 1
+
         return household
 
     def create_femsingle_hh(pop_data, cbg, count):
@@ -351,6 +370,15 @@ if __name__=="__main__":
         household.add_member(Person(pop_data['count'], 1, age, cbg, household, count))
         pop_data['count'] += 1
 
+        # assign children
+        children_percent = pop_data['femsingle_child_percent']
+        child_bool = random.choices([True, False], [children_percent, 100 - children_percent])[0]
+        if child_bool:
+            household.add_member(Person(pop_data['count'],
+                                        random.choices([0, 1], [pop_data['male_percent'], pop_data['female_percent']])[
+                                            0], random.choice(range(1, 18)), cbg, household, count))
+            pop_data['count'] += 1
+
         return household
 
     def create_malesingle_hh(pop_data, cbg, count):
@@ -363,6 +391,15 @@ if __name__=="__main__":
 
         household.add_member(Person(pop_data['count'], 0, age, cbg, household, count))
         pop_data['count'] += 1
+
+        # assign children
+        children_percent = pop_data['malesingle_child_percent']
+        child_bool = random.choices([True, False], [children_percent, 100 - children_percent])[0]
+        if child_bool:
+            household.add_member(Person(pop_data['count'],
+                                        random.choices([0, 1], [pop_data['male_percent'], pop_data['female_percent']])[
+                                            0], random.choice(range(1, 18)), cbg, household, count))
+            pop_data['count'] += 1
 
         return household
 
@@ -448,7 +485,7 @@ def prepare_data_for_papdata(household_list):
                     "age": person.age,
                     "home": person.household.id,
                     "availability": person.availability,  # Note the typo correction here
-                    "work_naics": person.work_naics,
+                    # "work_naics": person.work_naics,
                     "work_time": person.work_time,
                 }
             hh_info[hh_id] = {

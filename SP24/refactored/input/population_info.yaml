@@ -14,6 +14,10 @@
 "children_true_percent": 37.57
 "children_groups": [1, 2, 3, 4]
 "children_percent": [42.7, 36.9, 14.2, 6.2]
+"same_sex_child_percent": [5.7, 22.6]
+"opp_sex_child_percent": 34.5
+"femsingle_child_percent": 23.4
+"malesingle_child_percent": 6.0
 
 "size_percent": [34.7, 15.1, 12.3, 9.0]
 "size_groups": [2, 3, 4, 5]
