@@ -1112,7 +1112,7 @@ if __name__ == "__main__":
 
     hh, people = gen_households(total_households, total_population)
     finalize_time = time.time()
-    print("Time taken to generate all households:", finalize_time - start_time, "seconds")
+    print("Time taken to generate all households:", round(finalize_time - start_time,2), "seconds")
     print("Total population generated:", len(people))
     visualize_hh_size(hh)
 
