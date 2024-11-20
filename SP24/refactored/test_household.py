@@ -140,7 +140,7 @@ Data Hierarchy:
 '''
 
 input_data = {
-    "total_households": 10000,
+    "total_households": 100000,
     "avg_household_size": 2.49,
     "avg_family_size": 3.09,
     "pop_info": {
@@ -714,7 +714,7 @@ def generate_remaining_family_households(remaining_family_households, input_data
         for _ in tqdm(range(count), desc=f"Generating family households of size {hh_size}"):
             population = []
             for _ in range(hh_size):
-                age = np.random.randint(18, 90)  # Adjust to match age distribution if needed
+                age = np.random.randint(18, 90)
                 total_people_remaining = people_counts["male_adult"] + people_counts["female_adult"]
                 male_prob = people_counts["male_adult"] / total_people_remaining if total_people_remaining > 0 else 0.5
                 sex = np.random.choice([0, 1], p=[male_prob, 1 - male_prob])
@@ -724,7 +724,6 @@ def generate_remaining_family_households(remaining_family_households, input_data
                     people_counts["male_adult"] -= 1
                 else:
                     people_counts["female_adult"] -= 1
-
                 population.append(p)
             h = Household(population=population, type="family")
             households.append(h)
@@ -740,9 +739,10 @@ def generate_remaining_family_households(remaining_family_households, input_data
     household_sizes = ["2", "3", "4", "5", "6", "7+"]
 
     # Get target counts for each household size
-    target_household_size_counts = get_hh_size_count(total_family_households=remaining_family_households)
+    total_family_households = int(input_data["total_households"] * (input_data["household_info"]["family_households"]["total_percentage"] / 100))
+    target_household_size_counts = get_hh_size_count(total_family_households)
 
-    # Initialize counts for generated data
+    # Initialize counts for generated family households
     generated_household_size_counts = {size: 0 for size in household_sizes}
     for household in households:
         if household.type == "family":
@@ -756,14 +756,14 @@ def generate_remaining_family_households(remaining_family_households, input_data
     remaining_household_size_counts = {k: target_household_size_counts[k] - generated_household_size_counts.get(k, 0)
                                        for k in household_sizes}
 
-    # Handle negative counts by redistributing
-    total_negative = sum(-v for v in remaining_household_size_counts.values() if v < 0)
-    if total_negative > 0:
-        positive_sizes = [k for k, v in remaining_household_size_counts.items() if v > 0]
-        total_positive = sum(remaining_household_size_counts[k] for k in positive_sizes)
-        for k in positive_sizes:
-            reduction = int((remaining_household_size_counts[k] / total_positive) * total_negative)
-            remaining_household_size_counts[k] -= reduction
+    # Handle negative counts by redistributing surplus
+    total_surplus = sum(-v for v in remaining_household_size_counts.values() if v < 0)
+    if total_surplus > 0:
+        under_generated_sizes = [k for k, v in remaining_household_size_counts.items() if v > 0]
+        total_under_generated = sum(remaining_household_size_counts[k] for k in under_generated_sizes)
+        for k in under_generated_sizes:
+            addition = int((remaining_household_size_counts[k] / total_under_generated) * total_surplus)
+            remaining_household_size_counts[k] += addition
 
     # Generate households for each size
     for size, count in remaining_household_size_counts.items():
@@ -1008,12 +1008,13 @@ def gen_households(total_households, total_population):
     print("Final People Counts:", people_counts)
 
     # Calculate people off by percentage
-    people_off_by_percentage = {k: round((v / total_population * 100), 2) for k, v in people_counts.items()}
+    people_off_by_percentage = {
+        k: f"{round((v / total_population * 100), 2)}%"
+        for k, v in people_counts.items()
+    }
     print("People off by percentage:", people_off_by_percentage)
 
     return households, people
-
-
 
 
 ######################################################################################################
