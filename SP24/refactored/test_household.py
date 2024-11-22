@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 import time
+import csv
 
 '''
 The idea is to generate the number of people in each of the 4 large categories (male/female children/adults) first so that the total population would be close to the actual distribution.
@@ -140,7 +141,7 @@ Data Hierarchy:
 '''
 
 input_data = {
-    "total_households": 100000,
+    "total_households": 18159,
     "avg_household_size": 2.49,
     "avg_family_size": 3.09,
     "pop_info": {
@@ -1102,6 +1103,28 @@ def visualize_hh_size(hh):
         "Non-Family"
     )
 
+def save_households_to_csv(households, filename="households.csv"):
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        
+        # Write header
+        # writer.writerow(["Household ID", "Household Type", "Person ID", "Age", "Sex", "Position in Household", "Tags", "Census Block Group"])
+        writer.writerow(["Household ID", "Household Type", "Person ID", "Age", "Sex", "Position in Household", "Tags"])
+
+        # Write household data
+        for household in households:
+            for person in household.population:
+                writer.writerow([
+                    household.id,
+                    household.type,
+                    person.id,
+                    person.age,
+                    person.sex,
+                    person.position_in_hh,
+                    person.tags,
+                    # person.cbg
+                ])
+
 
 if __name__ == "__main__":
     start_time = time.time()
@@ -1111,6 +1134,11 @@ if __name__ == "__main__":
 
 
     hh, people = gen_households(total_households, total_population)
+
+    # Save household data to CSV
+    save_households_to_csv(hh, filename="households.csv")
+    print(f"Household data saved to 'households.csv'.")
+
     finalize_time = time.time()
     print("Time taken to generate all households:", round(finalize_time - start_time,2), "seconds")
     print("Total population generated:", len(people))
